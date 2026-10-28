@@ -43,7 +43,7 @@ Known issues:
 - **Lag with many cars on screen**, likely due to how many graphics are being rendered.
 - **Handling and acceleration can feel off** when the frame rate drops or is uneven. The cause is still being investigated.
 - A loud audio burst can happen at the start of a race.
-- The game crashed at the title screen on AMD Radeon integrated graphics (the only other graphics chip tested). It ran on the NVIDIA card in the same laptop.
+- The game crashes at the title screen when it runs on AMD Radeon integrated graphics (the only other graphics chip tested). On laptops with two graphics chips, Windows can pick the integrated one by default, so setup asks Windows to run the game on the high-performance chip (Settings, System, Display, Graphics). If it still crashes at the title screen, check that setting for `juiced2.exe`.
 - The first time you reach a new screen or track, there can be a short stutter while graphics shaders are prepared and saved.
 - Not tested: split-screen, downloadable content, and the end of Career.
 - Online features do not work.

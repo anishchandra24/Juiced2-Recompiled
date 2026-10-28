@@ -13,6 +13,16 @@ if (-not $failed) {
         $distIco      = Join-Path $DistDir "juiced2.ico"
         $resIco       = Join-Path $ResDir "juiced2.ico"
         $iconStamp    = Join-Path $LocalDir "icon-embedded.stamp"
+        # Laptops with two graphics chips: Windows may start the game on the weaker integrated chip,
+        # where it crashes at the title screen. Ask Windows to use the high-performance chip for this exe.
+        try {
+            $gpuKey = "HKCU:\Software\Microsoft\DirectX\UserGpuPreferences"
+            if (-not (Test-Path $gpuKey)) { New-Item -Path $gpuKey -Force | Out-Null }
+            New-ItemProperty -Path $gpuKey -Name $exe -Value "GpuPreference=2;" -PropertyType String -Force | Out-Null
+            Ok "Windows graphics preference for juiced2.exe set to High performance"
+        } catch {
+            Warn "Could not set the Windows graphics preference. If the game crashes at the title screen on a laptop with two graphics chips, set juiced2.exe to High performance in Settings, System, Display, Graphics."
+        }
 
         # 1. Get the game's own icon. The game writes juiced2.ico next to the exe the first time it runs.
         if ((-not $SkipIcon) -and (-not (Test-Path $resIco))) {
