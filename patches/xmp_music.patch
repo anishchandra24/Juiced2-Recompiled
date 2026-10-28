@@ -1,5 +1,5 @@
 diff --git a/src/kernel/xam/apps/xmp_app.cpp b/src/kernel/xam/apps/xmp_app.cpp
-index a5e9088..b8217ce 100644
+index a5e9088..d82b380 100644
 --- a/src/kernel/xam/apps/xmp_app.cpp
 +++ b/src/kernel/xam/apps/xmp_app.cpp
 @@ -7,13 +7,38 @@
@@ -281,8 +281,16 @@ index a5e9088..b8217ce 100644
  XmpApp::XmpApp(KernelState* kernel_state)
      : App(kernel_state, 0xFA),
        state_(State::kIdle),
-@@ -134,11 +392,23 @@ X_HRESULT XmpApp::XMPPlayTitlePlaylist(uint32_t playlist_handle, uint32_t song_h
-     return X_E_SUCCESS;
+@@ -129,16 +387,29 @@ X_HRESULT XmpApp::XMPPlayTitlePlaylist(uint32_t playlist_handle, uint32_t song_h
+     playlist = it->second;
+   }
+ 
++  // Juiced 2 leaves the playback controller on "system" yet still expects its own
++  // title playlist to be heard, so play it regardless of the controller setting.
+   if (playback_client_ == PlaybackClient::kSystem) {
+-    REXKRNL_WARN("XMPPlayTitlePlaylist: System playback is enabled!");
+-    return X_E_SUCCESS;
++    REXKRNL_DEBUG("XMPPlayTitlePlaylist: system controller set; playing title playlist anyway");
    }
  
 -  // Start playlist?
@@ -308,7 +316,7 @@ index a5e9088..b8217ce 100644
    OnStateChanged();
    kernel_state_->BroadcastNotification(kMsgPlaybackBehaviorChanged, 1);
    return X_E_SUCCESS;
-@@ -148,6 +418,7 @@ X_HRESULT XmpApp::XMPContinue() {
+@@ -148,6 +419,7 @@ X_HRESULT XmpApp::XMPContinue() {
    REXKRNL_DEBUG("XMPContinue()");
    if (state_ == State::kPaused) {
      state_ = State::kPlaying;
@@ -316,7 +324,7 @@ index a5e9088..b8217ce 100644
    }
    OnStateChanged();
    return X_E_SUCCESS;
-@@ -159,6 +430,7 @@ X_HRESULT XmpApp::XMPStop(uint32_t unk) {
+@@ -159,6 +431,7 @@ X_HRESULT XmpApp::XMPStop(uint32_t unk) {
    active_playlist_ = nullptr;  // ?
    active_song_index_ = 0;
    state_ = State::kIdle;
@@ -324,7 +332,7 @@ index a5e9088..b8217ce 100644
    OnStateChanged();
    return X_E_SUCCESS;
  }
-@@ -167,6 +439,7 @@ X_HRESULT XmpApp::XMPPause() {
+@@ -167,6 +440,7 @@ X_HRESULT XmpApp::XMPPause() {
    REXKRNL_DEBUG("XMPPause()");
    if (state_ == State::kPlaying) {
      state_ = State::kPaused;
@@ -332,7 +340,7 @@ index a5e9088..b8217ce 100644
    }
    OnStateChanged();
    return X_E_SUCCESS;
-@@ -174,18 +447,21 @@ X_HRESULT XmpApp::XMPPause() {
+@@ -174,18 +448,21 @@ X_HRESULT XmpApp::XMPPause() {
  
  X_HRESULT XmpApp::XMPNext() {
    REXKRNL_DEBUG("XMPNext()");
@@ -357,7 +365,7 @@ index a5e9088..b8217ce 100644
      return X_E_NOTFOUND;
    }
    state_ = State::kPlaying;
-@@ -194,6 +470,7 @@ X_HRESULT XmpApp::XMPPrevious() {
+@@ -194,6 +471,7 @@ X_HRESULT XmpApp::XMPPrevious() {
    } else {
      --active_song_index_;
    }
@@ -365,7 +373,7 @@ index a5e9088..b8217ce 100644
    OnStateChanged();
    return X_E_SUCCESS;
  }
-@@ -204,6 +481,25 @@ void XmpApp::OnStateChanged() {
+@@ -204,6 +482,25 @@ void XmpApp::OnStateChanged() {
  
  X_HRESULT XmpApp::DispatchMessageSync(uint32_t message, uint32_t buffer_ptr,
                                        uint32_t buffer_length) {
@@ -391,7 +399,7 @@ index a5e9088..b8217ce 100644
    // NOTE: buffer_length may be zero or valid.
    auto buffer = memory_->TranslateVirtual(buffer_ptr);
    switch (message) {
-@@ -298,6 +594,7 @@ X_HRESULT XmpApp::DispatchMessageSync(uint32_t message, uint32_t buffer_ptr,
+@@ -298,6 +595,7 @@ X_HRESULT XmpApp::DispatchMessageSync(uint32_t message, uint32_t buffer_ptr,
        assert_true(args->xmp_client == 0x00000002);
        REXKRNL_DEBUG("XMPSetVolume({:g})", float(args->value));
        volume_ = args->value;
@@ -399,7 +407,7 @@ index a5e9088..b8217ce 100644
        return X_E_SUCCESS;
      }
      case 0x0007000D: {
-@@ -343,21 +640,33 @@ X_HRESULT XmpApp::DispatchMessageSync(uint32_t message, uint32_t buffer_ptr,
+@@ -343,21 +641,33 @@ X_HRESULT XmpApp::DispatchMessageSync(uint32_t message, uint32_t buffer_ptr,
        auto info = memory_->TranslateVirtual(args->info_ptr);
        assert_true(args->xmp_client == 0x00000002);
        assert_zero(args->unk_ptr);

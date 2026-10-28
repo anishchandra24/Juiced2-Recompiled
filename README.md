@@ -12,7 +12,7 @@ This repository holds the pieces that make the ReXGlue SDK work with Juiced 2: t
 
 - `codegen_vector_alias.patch`: fixes a code-generation bug where one vector instruction could overwrite its own input.
 - `texture_mip_layout.patch`: corrects how the smaller mip levels of some textures are located in memory.
-- `xmp_music.patch` and `xmp_music_system.patch`: add music playback (the SDK does not play the game's music playlist on its own).
+- `xmp_music.patch`: adds music playback (the SDK does not play the game's music playlist on its own).
 
 The launcher program (`src/`) also contains a workaround for a crash caused by the game releasing memory too early, hides the mouse pointer, takes the window icon from your own copy of the game, and writes a crash report to `juiced2_crash.txt` next to the game if it crashes. The game itself is translated on your own computer from your own copy.
 
